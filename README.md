@@ -1,1 +1,1 @@
-# demand-curve-ui
+# Demand Curve UI

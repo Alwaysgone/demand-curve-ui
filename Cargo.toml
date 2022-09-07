@@ -1,0 +1,18 @@
+[package]
+name = "demand-curve-ui"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# async http server
+actix-web = "4"
+# used to serve files with actix
+actix-files = "0.6.2"
+# to get environment variables from a .env file
+dotenv = "0.15.0"
+log = "0.4.17"
+env_logger = "0.9.0"
+# serialization, json support
+serde = { version = "1.0.144", features = ["derive"] }

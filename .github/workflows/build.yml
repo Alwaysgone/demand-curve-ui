@@ -18,7 +18,7 @@ jobs:
       run: cargo test --verbose
     - run: wasm-pack build --target web
     - name: uploading build
-        uses: actions/upload-artifact@v3
-        with:
-          name: curve-webapp
-          path: www
+      uses: actions/upload-artifact@v3
+      with:
+        name: curve-webapp
+        path: www

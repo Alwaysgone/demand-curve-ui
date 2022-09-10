@@ -1,6 +1,6 @@
 /target
 **/*.rs.bk
-Cargo.lock
+# Cargo.lock # better commit Cargo.lock to get reproducible builds
 bin/
 pkg/
 wasm-pack.log

@@ -7,16 +7,16 @@ env:
 
 jobs:
   build:
-    name: Build wasm app and upload artifact
+    name: Build WASM
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: install wasm-pack
+    - name: Install wasm-pack
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-    - name: run tests
+    - name: Run tests
       run: cargo test --verbose
     - run: wasm-pack build --target web
-    - name: uploading build
+    - name: Upload build
       uses: actions/upload-artifact@v3
       with:
         name: curve-webapp
@@ -24,11 +24,11 @@ jobs:
           pkg
           www
   publish:
-    name: Download wasm app and publish to github page
+    name: Publish to alwaysgone.github.io
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: download build
+      - name: Download build
         uses: actions/download-artifact@v3
         with:
           name: curve-webapp

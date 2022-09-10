@@ -1,4 +1,4 @@
-name: build
+name: pipeline
 
 on: push
 
@@ -7,9 +7,8 @@ env:
 
 jobs:
   build:
-
+    name: Build wasm app and upload artifact
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: install wasm-pack
@@ -24,3 +23,12 @@ jobs:
         path: |
           pkg
           www
+  publish:
+    name: Download wasm app and publish to github page
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: download build
+        uses: actions/download-artifact@v3
+        with:
+          name: curve-webapp

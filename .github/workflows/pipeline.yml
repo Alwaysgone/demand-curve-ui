@@ -29,12 +29,17 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - run: wasm-pack build --target web
+    - shell: bash
+        run: |
+          pwd
+          ls -al
+          mkdir deploy
+          mv pkg deploy/pkg
+          mv www deploy/www
     - name: Upload build
       uses: actions/upload-pages-artifact@v1
       with:
-        path: |
-          pkg
-          www
+        path: deploy
     #  uses: actions/upload-artifact@v3
     #  with:
     #    name: curve-webapp

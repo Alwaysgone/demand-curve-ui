@@ -1,6 +1,6 @@
 # Demand Curve UI
 
-[![demand-curve-ui](https://github.com/Alwaysgone/demand-curve-ui/actions/workflows/pipeline.yml/badge.svg?branch=master)](https://github.com/Alwaysgone/demand-curve-ui/actions/workflows/pipeline.yml) [![Demo - Unavailable](https://img.shields.io/badge/Demo-Unavailable-red)](https://alwaysgone.github.io/demos/curve/index.html)
+[![demand-curve-ui](https://github.com/Alwaysgone/demand-curve-ui/actions/workflows/pipeline.yml/badge.svg?branch=master)](https://github.com/Alwaysgone/demand-curve-ui/actions/workflows/pipeline.yml) [![Demo - alwaysgone.github.io](https://img.shields.io/badge/Demo-Unavailable-green)](https://alwaysgone.github.io/demand-curve-ui/www/)
 
 *Running without npm:*
 

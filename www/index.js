@@ -39,7 +39,8 @@ function updatePlot() {
     chart = null;
     const start = performance.now();
 	//chart = Chart.power("canvas", 5)
-	chart = Chart.demandCurve("canvas");
+	//chart = Chart.demandCurve("canvas");
+    chart = Chart.demand_curve_time_series("canvas", "startTime", "endTime");
     const end = performance.now();
     status.innerText = `Rendered chart in ${Math.ceil(end - start)}ms`;
 }

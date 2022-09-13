@@ -30,6 +30,7 @@ web-sys = { version = "0.3.39", features = ["HtmlCanvasElement"] }
 
 plotters = "0.3.1"
 plotters-canvas = "0.3.0"
+chrono = "0.4.22"
 
 
 [dev-dependencies]

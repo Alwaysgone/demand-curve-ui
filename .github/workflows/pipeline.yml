@@ -5,6 +5,11 @@ on: push
 env:
   CARGO_TERM_COLOR: always
 
+  permissions:
+    contents: read
+    pages: write
+    id-token: write
+
 jobs:
   build:
     name: Build WASM
@@ -17,18 +22,32 @@ jobs:
       run: cargo test --verbose
     - run: wasm-pack build --target web
     - name: Upload build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-pages-artifact@v1.0.1
       with:
-        name: curve-webapp
         path: |
           pkg
           www
+    #  uses: actions/upload-artifact@v3
+    #  with:
+    #    name: curve-webapp
+    #    path: |
+    #      pkg
+    #      www
+  
   publish:
-    name: Publish to alwaysgone.github.io
+    name: Publish
     needs: build
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
     runs-on: ubuntu-latest
     steps:
-      - name: Download build
-        uses: actions/download-artifact@v3
-        with:
-          name: curve-webapp
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+      #- name: Download build
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: curve-webapp

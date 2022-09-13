@@ -187,9 +187,9 @@ pub fn draw_demand_curve_time_series(canvas_id: &str) {
     dates.push((current, 10.0));
     current = current + Duration::minutes(10);
     dates.push((current, 10.0));
-    dates.push((current, 30.0));
+    dates.push((current, 20.0));
     current = current + Duration::minutes(20);
-    dates.push((current, 30.0));
+    dates.push((current, 20.0));
     dates.push((current, 10.0));
     current = current + Duration::minutes(15);
     dates.push((current, 10.0));

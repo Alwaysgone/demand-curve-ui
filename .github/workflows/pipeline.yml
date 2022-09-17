@@ -36,6 +36,8 @@ jobs:
         ls -al
     - name: Run trunk build
       run: trunk build --release
+    - name: Fix resource paths
+      run: sed -i 's/\/demand-curve-ui/\/demand-curve-ui\/demand-curve-ui/g' dist/index.html
     - name: Upload build
       uses: actions/upload-pages-artifact@v1
       with:

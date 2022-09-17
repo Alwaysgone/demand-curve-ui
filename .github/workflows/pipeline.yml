@@ -24,20 +24,15 @@ jobs:
           ~/.cargo/git
           target
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    - name: Install wasm-pack
-      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    - name: Install trunk
+      run: cwget -qO- https://github.com/thedodd/trunk/releases/download/v0.16.0/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xzf-
     - name: Run tests
       run: cargo test --verbose
-    - run: wasm-pack build --target web
-    - shell: bash
-      run: |
-        mkdir deploy
-        mv pkg deploy/pkg
-        mv www deploy/www
+    - run: trunk build
     - name: Upload build
       uses: actions/upload-pages-artifact@v1
       with:
-        path: deploy
+        path: dist
   
   publish:
     name: Publish

@@ -1,8 +1,2 @@
 /target
-**/*.rs.bk
-# Cargo.lock # better commit Cargo.lock to get reproducible builds
-bin/
-pkg/
-wasm-pack.log
-**/node_modules
-**/dist
+/dist

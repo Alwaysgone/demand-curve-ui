@@ -31,16 +31,10 @@ jobs:
         target: wasm32-unknown-unknown
     - name: trunk-action
       uses: jetli/trunk-action@v0.1.0
-    - shell: bash
-      run: |
-        ls -al
     - name: Run trunk build
       run: trunk build --release
     - name: Fix resource paths
       run: sed -i 's/\/demand-curve-ui/\/demand-curve-ui\/demand-curve-ui/g' dist/index.html
-    - shell: bash
-      run: |
-        cat dist/index.html
     - name: Upload build
       uses: actions/upload-pages-artifact@v1
       with:

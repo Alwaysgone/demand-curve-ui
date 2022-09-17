@@ -35,7 +35,6 @@ jobs:
       run: trunk build --release
     - name: Fix resource paths
       run: sed -i 's/\/demand-curve-ui/\/demand-curve-ui\/demand-curve-ui/g' dist/index.html
-    - name: Include sample demand curve data
     - shell: bash
       run: |
         mv test_data.json dist

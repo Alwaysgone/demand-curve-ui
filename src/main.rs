@@ -1,6 +1,7 @@
 use sycamore::prelude::*;
 use plotters::prelude::*;
 use plotters_canvas::CanvasBackend;
+//use env_logger::Builder;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 struct CanvasParams(i32);
@@ -15,16 +16,38 @@ impl CanvasParams {
     }
 }
 
-fn main() {
-    sycamore::render(|cx| {
-        let canvas_params = create_signal(cx, CanvasParams(2));
-        provide_context_ref(cx, canvas_params);
-        let power_value = create_signal(cx, 2);
-        //draw("canvas", canvas_params.get().get_power_value());
-        let view_model = view! { cx,
+#[component]
+fn DemandCurve<G: Html>(cx: Scope) -> View<G> {
+    let canvas_params = create_signal(cx, CanvasParams(2));
+    provide_context_ref(cx, canvas_params);
+    let power_value = create_signal(cx, 2);
+
+    let output = create_signal(cx, String::from("nothing"));
+    //let text:String = String::from("/test_data.json");
+    let demand_curve_data_endpoint = create_signal(cx, String::from("/test_data.json"));
+    let update = create_effect(cx, || {
+        let request_url = (*demand_curve_data_endpoint.get()).clone();
+        /*
+        let request_result = reqwest::get(&request_url);
+        if request_result.is_err() {
+            output.set(request_result.err().unwrap().to_string());
+        } else {
+            output.set(request_result.unwrap().text().unwrap());
+        }
+        */
+        //demand_curve_data_endpoint.track();
+        output.set((*demand_curve_data_endpoint.get()).clone());
+    });
+        //value="/test_data.json"
+    view! { cx,
+        div(style="position: relative;display: flex;flex-flow: column wrap;align-items: center;") {
+            input(id="demand_curve_data_endpoint", type="text", bind:value=demand_curve_data_endpoint)
             p(id="power_value") {
                 //(canvas_params.get().get_power_value())
                 (power_value.get())
+            }
+            p(id="output") {
+                (output.get())
             }
             //p { "Hello, World!" }
             button(on:click=|_| {   
@@ -36,7 +59,25 @@ fn main() {
                                 }) {
                 "Increase power"
             }
-            canvas(id="canvas", width="600", height="400")
+        }
+        
+        canvas(id="canvas", width="800", height="600", style="padding-left: 0;padding-right: 0;margin-left: auto;margin-right: auto;display: block;")
+    }
+}
+
+fn main() {
+    // env_logger::Builder::new()
+    // .init();
+    
+    sycamore::render(|cx| {
+        
+        //draw("canvas", canvas_params.get().get_power_value());
+        let view_model = view! { cx,
+            // Suspense(fallback=view! {cx,
+            //     "Loading DemandCurve..."
+            // }) {
+                DemandCurve {}
+            // }
         };
 
         //draw("canvas", *power_value.get());

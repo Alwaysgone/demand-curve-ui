@@ -1,7 +1,10 @@
 use sycamore::prelude::*;
+use sycamore::suspense::*;
+use sycamore::futures::spawn_local_scoped;
 use plotters::prelude::*;
 use plotters_canvas::CanvasBackend;
-//use env_logger::Builder;
+use url::{Url, ParseError};
+
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 struct CanvasParams(i32);
@@ -16,8 +19,17 @@ impl CanvasParams {
     }
 }
 
+async fn get_demand_curve_data_response(url: Url) -> String {
+    let request_result = reqwest::get(url).await;
+    if request_result.is_err() {
+        request_result.err().unwrap().to_string()
+    } else {
+        request_result.unwrap().text().await.unwrap()
+    }
+}
+
 #[component]
-fn DemandCurve<G: Html>(cx: Scope) -> View<G> {
+async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
     let canvas_params = create_signal(cx, CanvasParams(2));
     provide_context_ref(cx, canvas_params);
     let power_value = create_signal(cx, 2);
@@ -25,10 +37,23 @@ fn DemandCurve<G: Html>(cx: Scope) -> View<G> {
     let output = create_signal(cx, String::from("nothing"));
     //let text:String = String::from("/test_data.json");
     let demand_curve_data_endpoint = create_signal(cx, String::from("/test_data.json"));
-    let update = create_effect(cx, || {
-        let request_url = (*demand_curve_data_endpoint.get()).clone();
+    let update = create_effect(cx, move || {
+        
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+        let request_url = Url::parse(document.url().unwrap().as_str())
+        .unwrap()
+        .join((*demand_curve_data_endpoint.get()).clone().as_str())
+        .unwrap();
+        //output.set(request_url.to_string());
+        
+        spawn_local_scoped(cx, async move {
+            let response = get_demand_curve_data_response(request_url).await;
+            output.set(response);
+        });
+        
         /*
-        let request_result = reqwest::get(&request_url);
+        let request_result = reqwest::get(&request_url).await?;
         if request_result.is_err() {
             output.set(request_result.err().unwrap().to_string());
         } else {
@@ -36,7 +61,7 @@ fn DemandCurve<G: Html>(cx: Scope) -> View<G> {
         }
         */
         //demand_curve_data_endpoint.track();
-        output.set((*demand_curve_data_endpoint.get()).clone());
+        //output.set((*demand_curve_data_endpoint.get()).clone());
     });
         //value="/test_data.json"
     view! { cx,
@@ -73,11 +98,11 @@ fn main() {
         
         //draw("canvas", canvas_params.get().get_power_value());
         let view_model = view! { cx,
-            // Suspense(fallback=view! {cx,
-            //     "Loading DemandCurve..."
-            // }) {
+            Suspense(fallback=view! {cx,
+                "Loading DemandCurve..."
+            }) {
                 DemandCurve {}
-            // }
+            }
         };
 
         //draw("canvas", *power_value.get());

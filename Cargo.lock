@@ -189,6 +189,9 @@ dependencies = [
  "reqwest",
  "serde",
  "sycamore",
+ "sycamore-futures",
+ "url",
+ "web-sys",
 ]
 
 [[package]]
@@ -1164,6 +1167,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "46a7d42f5f04604dfee0076676ec1763d26eeb7c6704139913bee6651fe0cbe1"
 dependencies = [
  "ahash",
+ "futures",
  "indexmap",
  "js-sys",
  "paste",
@@ -1173,6 +1177,7 @@ dependencies = [
  "sycamore-reactive",
  "sycamore-web",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 

@@ -36,9 +36,10 @@ jobs:
     - name: Fix resource paths
       run: sed -i 's/\/demand-curve-ui/\/demand-curve-ui\/demand-curve-ui/g' dist/index.html
     - name: Include sample demand curve data
-    - run: shell |
-      mv test_data.json dist
-      ls -al dist
+    - shell: bash
+      run: |
+        mv test_data.json dist
+        ls -al dist
     - name: Upload build
       uses: actions/upload-pages-artifact@v1
       with:

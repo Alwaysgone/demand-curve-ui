@@ -45,11 +45,12 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
         .unwrap()
         .join((*demand_curve_data_endpoint.get()).clone().as_str())
         .unwrap();
+        let request_url_str = request_url.to_string();
         //output.set(request_url.to_string());
         
         spawn_local_scoped(cx, async move {
             let response = get_demand_curve_data_response(request_url).await;
-            output.set(response);
+            output.set(request_url_str);
         });
         
         /*

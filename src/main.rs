@@ -12,7 +12,7 @@ use chrono::{TimeZone, Utc, DateTime, Duration};
 #[derive(Clone, Copy, PartialEq, Eq)]
 struct CanvasParams(i32);
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd)]
 struct DemandCurveInput {
     timestamp: DateTime<Utc>,
     value: f64,
@@ -96,7 +96,10 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
                                                                     };        
                                                                 })
                                                                 .collect();
-                                                            let from = Utc.ymd(2022, 9, 17).and_hms(20, 0, 0);
+                                                            let from = DateTime::parse_from_rfc3339("2022-09-17T20:00:00.000Z")
+                                                            .unwrap()
+                                                            .with_timezone(&Utc);
+                                                            //let from = Utc.ymd(2022, 9, 17).and_hms(20, 0, 0);
                                                             // let mut demand_curve_inputs: Vec<DemandCurveInput> = Vec::new();
                                                             // demand_curve_inputs.push(DemandCurveInput {
                                                             //                 timestamp: from,
@@ -211,6 +214,65 @@ pub fn draw(canvas_id: &str, power: i32) {
     //return Ok(chart.into_coord_trans());
 }
 
+fn fit_demand_curve_inputs_into_datetime_range(from: DateTime<Utc>, to: DateTime<Utc>, demand_curve_inputs: Vec<DemandCurveInput>) -> Vec<DemandCurveInput> {
+    // let mut dci = demand_curve_inputs.clone();
+    // dci.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+    // let filtered_dci = Vec::from_iter(dci.iter()
+    // .filter(|i| i.timestamp >= from && i.timestamp < to)
+    // );
+    if demand_curve_inputs.is_empty() {
+        demand_curve_inputs
+    } else {
+        let mut last_demand_before_from = Option::None;
+        let mut fitted_demand_curve_inputs = Vec::new();
+        //let mut last_input;
+        let mut found_input_with_from_timestamp = false;
+        for i in 0..demand_curve_inputs.len() {
+            let demand_curve_input = demand_curve_inputs.get(i).unwrap();
+            if demand_curve_input.timestamp < from {
+                last_demand_before_from = Some(demand_curve_input);
+            }
+            if demand_curve_input.timestamp >= from || demand_curve_input.timestamp < to {
+                if demand_curve_input.timestamp == from {
+                    // this does not seem to work
+                    found_input_with_from_timestamp = true;
+                }
+                // if !found_first_input {
+                //     found_first_input = true;
+                //     if demand_curve_input.timestamp > from && last_input.timestamp < from {
+                //         fitted_demand_curve_inputs.push(DemandCurveInput { timestamp: from, value: last_input.value });
+                //     }
+                // }
+                fitted_demand_curve_inputs.push(DemandCurveInput { timestamp: demand_curve_input.timestamp, value: demand_curve_input.value });
+            }
+        }
+
+        if fitted_demand_curve_inputs.is_empty() || !found_input_with_from_timestamp {
+            match last_demand_before_from {
+                Some(d) => fitted_demand_curve_inputs.insert(0, DemandCurveInput { timestamp: from, value: d.value }),
+                None => {},
+            }
+        }
+
+        // if only one demand_curve_input 
+        // if !found_first_input && fitted_demand_curve_inputs.is_empty() {
+        //     fitted_demand_curve_inputs.push(DemandCurveInput { timestamp: from, value: last_input.value });
+        // }
+
+        // let first_input = dci.iter()
+        // .filter(|i| i.timestamp >= from && i.timestamp < to)
+        // .find(predicate) demand_curve_inputs.first().unwrap();
+        // if first_input.timestamp <= from {
+        //     fitted_demand_curve_inputs.push(DemandCurveInput { timestamp: from, value: first_input.value });
+        // } else {
+        //     fitted_demand_curve_inputs.push(*first_input);
+        // }
+        // for i in 1..demand_curve_inputs.len() {
+
+        // }
+        fitted_demand_curve_inputs
+    }
+}
 
 async fn draw_demand_curve_time_series(canvas_id: &str, from: DateTime<Utc>, to: DateTime<Utc>, demand_curve_inputs: Vec<DemandCurveInput>) {
     // -> DrawResult<impl Fn((i32, i32)) -> Option<(DateTime<Utc>, f32)>>
@@ -247,17 +309,38 @@ async fn draw_demand_curve_time_series(canvas_id: &str, from: DateTime<Utc>, to:
     .draw()
     .unwrap();
 
-    let mut data_points:Vec<(DateTime<Utc>, f64)> = Vec::new();
-    let first_input = demand_curve_inputs.first().unwrap();
-    data_points.push((first_input.timestamp, first_input.value));
-    let mut previous_input = first_input;
-    for i in 1..demand_curve_inputs.len() {
-        let input = demand_curve_inputs.get(i).unwrap();
-        data_points.push((input.timestamp, previous_input.value));
-        data_points.push((input.timestamp, input.value));
-        previous_input = input;
+    let fitted_inputs = fit_demand_curve_inputs_into_datetime_range(from, to, demand_curve_inputs);
+
+    if !fitted_inputs.is_empty() {
+        let mut data_points:Vec<(DateTime<Utc>, f64)> = Vec::new();
+        let mut previous_input = fitted_inputs.first().unwrap();
+        data_points.push((previous_input.timestamp, previous_input.value));
+        for i in 1..fitted_inputs.len() {
+            let input = fitted_inputs.get(i).unwrap();
+            data_points.push((input.timestamp, previous_input.value));
+            data_points.push((input.timestamp, input.value));
+            previous_input = input;
+        }
+        data_points.push((to, previous_input.value));
+
+        chart.draw_series(LineSeries::new(
+            data_points.iter().map(|d| (d.0, d.1)),
+            &RED,
+        ))
+        .unwrap();
     }
-    data_points.push((to, previous_input.value));
+
+    // let mut data_points:Vec<(DateTime<Utc>, f64)> = Vec::new();
+    // let first_input = demand_curve_inputs.first().unwrap();
+    // data_points.push((first_input.timestamp, first_input.value));
+    // let mut previous_input = first_input;
+    // for i in 0..fitted_inputs.len() {
+    //     let input = demand_curve_inputs.get(i).unwrap();
+    //     data_points.push((input.timestamp, previous_input.value));
+    //     data_points.push((input.timestamp, input.value));
+    //     previous_input = input;
+    // }
+    // data_points.push((to, previous_input.value));
 
     // let mut current = start;
 
@@ -274,11 +357,6 @@ async fn draw_demand_curve_time_series(canvas_id: &str, from: DateTime<Utc>, to:
     // dates.push((current, 10.0));
     // current = current + Duration::minutes(15);
     // dates.push((current, 10.0));
-    chart.draw_series(LineSeries::new(
-        data_points.iter().map(|d| (d.0, d.1)),
-        &RED,
-    ))
-    .unwrap();
 
     let zero_line = [(from, 0.0), (to, 0.0)];
 

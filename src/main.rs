@@ -36,7 +36,7 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
 
     let output = create_signal(cx, String::from("nothing"));
     //let text:String = String::from("/test_data.json");
-    let demand_curve_data_endpoint = create_signal(cx, String::from("/test_data.json"));
+    let demand_curve_data_endpoint = create_signal(cx, String::from("test_data.json"));
     let update = create_effect(cx, move || {
         
         let window = web_sys::window().expect("no global `window` exists");
@@ -45,12 +45,12 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
         .unwrap()
         .join((*demand_curve_data_endpoint.get()).clone().as_str())
         .unwrap();
-        let request_url_str = request_url.to_string();
+        //let request_url_str = request_url.to_string();
         //output.set(request_url.to_string());
         
         spawn_local_scoped(cx, async move {
             let response = get_demand_curve_data_response(request_url).await;
-            output.set(request_url_str);
+            output.set(response);
         });
         
         /*

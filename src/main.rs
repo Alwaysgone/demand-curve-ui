@@ -29,12 +29,12 @@ struct DemandCurveInput {
 // }
 
 async fn get_demand_curve_data_response(url: Url) -> std::result::Result<serde_json::Value, String> {
-    let urlString = url.to_string();
+    let url_string = url.to_string();
     let request_result = reqwest::get(url).await;
 
     if request_result.is_err() {
         //let errorMessage = request_result.as_ref().err().unwrap().to_string();
-        Err(format!("An error occurred while requesting {}: {}", urlString, request_result.as_ref().err().unwrap()))
+        Err(format!("An error occurred while requesting {}: {}", url_string, request_result.as_ref().err().unwrap()))
     } else {
         let parse_result = request_result.unwrap().json::<serde_json::Value>().await;
         match parse_result {

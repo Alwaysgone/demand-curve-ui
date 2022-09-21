@@ -6,11 +6,61 @@
   <link data-trunk rel="copy-file" href="test_data.json"/>
   <link data-trunk rel="copy-file" href="resources/jquery.datetimepicker.min.css"/>
   <link data-trunk rel="copy-file" href="resources/jquery.datetimepicker.full.js"/>
+  <link data-trunk rel="copy-file" href="resources/jquery-3.6.1.min.js"/>
   <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="jquery.datetimepicker.min.css"/>
-    <script src="jquery.datetimepicker.full.js"></script> 
+    <script src="jquery-3.6.1.min.js"></script>
+    <script src="jquery.datetimepicker.full.js"></script>
     <title>Demand Curve UI</title>
   </head>
-  <body></body>
+  <body>
+    <div style="position: relative;display: flex;flex-flow: column wrap;align-items: center;">
+      <label for="demand_curve_data_from">From</label>
+      <input type="text" id="demand_curve_data_from"/>
+      <label for="demand_curve_data_to">To</label>
+      <input type="text" id="demand_curve_data_to"/>
+    </div>
+    <script>
+      function initDatePicker() {
+        $('#demand_curve_data_from').datetimepicker({
+          format: 'Y-m-d H:i',
+          formatDate: 'Y-m-d',
+          formatTime: 'H:i',
+          step: 15,
+          onChangeDateTime: setHiddenFromInput
+        });
+        $('#demand_curve_data_to').datetimepicker({
+          format: 'Y-m-d H:i',
+          formatDate: 'Y-m-d',
+          formatTime: 'H:i',
+          step: 15,
+          onChangeDateTime: setHiddenToInput
+        });
+        function setHiddenFromInput() {
+          console.log('Setting value ' + $('#demand_curve_data_from').val() + ' for from value');
+          //document.getElementById("demand_curve_data_from_hidden").value = document.getElementById("demand_curve_data_from").value;
+          $('#demand_curve_data_from_hidden').val($('#demand_curve_data_from').val())
+          const event = new Event("input", {
+            bubbles: true,
+            cancelable: true,
+          });
+          // trigger input event manually because setting the value per script does not trigger the input event necessary for sycamore to sync the value
+          document.getElementById("demand_curve_data_from_hidden").dispatchEvent(event);
+          //$('#demand_curve_data_from_hidden').trigger("input");
+          //$('#demand_curve_data_from_hidden').on("input");
+        };
+        function setHiddenToInput() {
+          $('#demand_curve_data_to_hidden').val($('#demand_curve_data_to').val());
+          const event = new Event("input", {
+            bubbles: true,
+            cancelable: true,
+          });
+          document.getElementById("demand_curve_data_to_hidden").dispatchEvent(event);
+          //$('#demand_curve_data_to_hidden').on("input");
+        };
+      }
+      initDatePicker();
+    </script>
+  </body>
 </html>

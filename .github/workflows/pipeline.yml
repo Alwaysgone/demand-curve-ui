@@ -32,9 +32,7 @@ jobs:
     - name: trunk-action
       uses: jetli/trunk-action@v0.1.0
     - name: Run trunk build
-      run: trunk build --release
-    - name: Fix resource paths
-      run: sed -i 's/\/demand-curve-ui/\/demand-curve-ui\/demand-curve-ui/g' dist/index.html
+      run: trunk build --release --public-url demand-curve-ui
     - name: Upload build
       uses: actions/upload-pages-artifact@v1
       with:

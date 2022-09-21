@@ -4,8 +4,12 @@
   <link data-trunk rel="rust" data-wasm-opt="s" />
   <!-- necessary for trunk to copy test_data.json to dist directly during build-->
   <link data-trunk rel="copy-file" href="test_data.json"/>
+  <link data-trunk rel="copy-file" href="resources/jquery.datetimepicker.min.css"/>
+  <link data-trunk rel="copy-file" href="resources/jquery.datetimepicker.full.js"/>
   <head>
     <meta charset="utf-8" />
+    <link rel="stylesheet" href="jquery.datetimepicker.min.css"/>
+    <script src="jquery.datetimepicker.full.js"></script> 
     <title>Demand Curve UI</title>
   </head>
   <body></body>

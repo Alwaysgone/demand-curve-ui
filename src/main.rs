@@ -1,11 +1,11 @@
-use chrono::Timelike;
 use sycamore::prelude::*;
 use sycamore::suspense::*;
 use sycamore::futures::spawn_local_scoped;
 use plotters::prelude::*;
 use plotters_canvas::CanvasBackend;
 use url::Url;
-use chrono::{NaiveDateTime, Utc, DateTime, Duration};
+use chrono::{Utc, DateTime, Duration};
+// use wasm_bindgen::prelude::*;
 //use chrono::{NaiveDate, NaiveDateTime};
 //use bigdecimal::BigDecimal;
 
@@ -54,6 +54,9 @@ async fn get_demand_curve_data_response(url: Url) -> std::result::Result<serde_j
     */
 }
 
+// #[wasm_bindgen]
+// extern { fn initDatePicker(); }
+
 #[component]
 async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
     let canvas_params = create_signal(cx, CanvasParams(2));
@@ -63,17 +66,25 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
     let output = create_signal(cx, String::from("nothing"));
     //let text:String = String::from("/test_data.json");
     let demand_curve_data_endpoint = create_signal(cx, String::from("test_data.json"));
-    let datetime_picker_format = "%Y-%m-%d %H:%M";
-    let current_hour = Utc::now()
-    .with_minute(0).unwrap()
-    .with_second(0).unwrap()
-    .with_nanosecond(0).unwrap();
+    //let datetime_picker_format = "%Y-%m-%d %H:%M";
+    // let current_hour = Utc::now()
+    // .with_minute(0).unwrap()
+    // .with_second(0).unwrap()
+    // .with_nanosecond(0).unwrap();
     //let demand_curve_data_from_node_ref = create_node_ref(cx);
     //current_hour.format(datetime_picker_format).to_string()
     let demand_curve_data_from = create_signal(cx, String::new());
     //(current_hour + Duration::hours(1)).format(datetime_picker_format).to_string()
     let demand_curve_data_to = create_signal(cx, String::new());
 
+    // sycamore::web::on_mount(cx, move || {
+    //     web_sys::console::log_1(&"Starting initDatePicker call timer".into());
+    //     spawn_local_scoped(cx, async {
+    //         futures_timer::Delay::new(std::time::Duration::from_secs(5)).await;
+    //         web_sys::console::log_1(&"Calling initDatePicker".into());
+    //         initDatePicker();
+    //     });
+    // });
 
     create_effect(cx, move || {
         let window = web_sys::window().expect("no global `window` exists");
@@ -100,66 +111,78 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
                 if from_val.to_string().is_empty() || to_val.to_string().is_empty() {
                     //web_sys::console::log_1(&format!("From val at empty check {}", from_val.to_string()).into());
                     //web_sys::console::log_1(&format!("To val at empty check {}", to_val.to_string()).into());
-                    output.set("Set valid From and To parameters".to_string());
+                    output.set("Set date range parameter".to_string());
                 } else {
                     let response = get_demand_curve_data_response(request_url.unwrap()).await;
                     match response {
                         Ok(j) => output.set(match j.as_array() {
                             Some(json_array) => {
-                                                                let demand_curve_inputs: Vec<DemandCurveInput> = json_array.iter().map(|v| {
-                                                                        let timestamp = DateTime::parse_from_rfc3339(v.get("timestamp").unwrap().as_str().unwrap())
-                                                                        .unwrap()
-                                                                        .with_timezone(&Utc);
-                                                                        let value: f64 = v.get("value").unwrap().as_f64().unwrap();
-                                                                        return DemandCurveInput {
-                                                                            timestamp: timestamp,
-                                                                            value: value,
-                                                                        };        
-                                                                    })
-                                                                    .collect();
-                                                                // let from = DateTime::parse_from_rfc3339("2022-09-17T20:00:00.000Z")
-                                                                // .unwrap()
-                                                                // .with_timezone(&Utc);
-                                                                // web_sys::console::log_1(&"Parsing test value 2022-09-21 20:00".into());
-                                                                // match DateTime::parse_from_str("2022-09-21 20:00", datetime_picker_format) {
-                                                                //     Err(e) => web_sys::console::log_1(&format!("Error parsing test value:  {}", e).into()),
-                                                                //     Ok(v) => web_sys::console::log_1(&format!("Parsed test value to {}", v).into()),
-                                                                // }
-                                                                //web_sys::console::log_1(&format!("Parsed test value to {}", test).into());
-                                                                web_sys::console::log_1(&format!("Trying to parse from value {}", from_val).into());
-                                                                let from_naive = NaiveDateTime::parse_from_str(from_val, datetime_picker_format)
-                                                                .unwrap();
-                                                                web_sys::console::log_1(&format!("Parsed from to NaiveDateTime {}", from_naive).into());
-                                                                let from = DateTime::<Utc>::from_utc(from_naive, Utc);
-                                                                web_sys::console::log_1(&format!("Parsed from to DateTime<Utc> {}", from).into());
-                                                                //.with_timezone(&Utc);
-                                                                web_sys::console::log_1(&format!("Parsed from value to {}", from).into());
-                                                                // let to = DateTime::parse_from_str(&demand_curve_data_to.get(), "%Y-%m-%d %H:%M")
-                                                                // .unwrap()
-                                                                // .with_timezone(&Utc);
-                                                                //let from = Utc.ymd(2022, 9, 17).and_hms(20, 0, 0);
-                                                                // let mut demand_curve_inputs: Vec<DemandCurveInput> = Vec::new();
-                                                                // demand_curve_inputs.push(DemandCurveInput {
-                                                                //                 timestamp: from,
-                                                                //                 value: 10.0,
-                                                                //             });
-                                                                // demand_curve_inputs.push(DemandCurveInput {
-                                                                //     timestamp: from + Duration::minutes(15),
-                                                                //     value: 20.0,
-                                                                // });
+                                let demand_curve_inputs: Vec<DemandCurveInput> = json_array.iter().map(|v| {
+                                        let timestamp = DateTime::parse_from_rfc3339(v.get("timestamp").unwrap().as_str().unwrap())
+                                        .unwrap()
+                                        .with_timezone(&Utc);
+                                        let value: f64 = v.get("value").unwrap().as_f64().unwrap();
+                                        return DemandCurveInput {
+                                            timestamp: timestamp,
+                                            value: value,
+                                        };        
+                                    })
+                                    .collect();
+                                // let from = DateTime::parse_from_rfc3339("2022-09-17T20:00:00.000Z")
+                                // .unwrap()
+                                // .with_timezone(&Utc);
+                                // web_sys::console::log_1(&"Parsing test value 2022-09-21 20:00".into());
+                                // match DateTime::parse_from_str("2022-09-21 20:00", datetime_picker_format) {
+                                //     Err(e) => web_sys::console::log_1(&format!("Error parsing test value:  {}", e).into()),
+                                //     Ok(v) => web_sys::console::log_1(&format!("Parsed test value to {}", v).into()),
+                                // }
+                                //web_sys::console::log_1(&format!("Parsed test value to {}", test).into());
+                                web_sys::console::log_1(&format!("Trying to parse from value {}", from_val).into());
+                                // let from_naive = NaiveDateTime::parse_from_str(from_val, datetime_picker_format)
+                                // .unwrap();
+                                let from_offset = DateTime::parse_from_rfc3339(from_val).unwrap();
+                                web_sys::console::log_1(&format!("Parsed from value to fixed offset datetime: {}", from_offset).into());
+                                let from_naive = from_offset.naive_utc();
+                                web_sys::console::log_1(&format!("Parsed from value to naive datetime: {}", from_naive).into());
+                                let from = DateTime::<Utc>::from_utc(from_naive, Utc);
+                                // let from_naive = NaiveDateTime::parse_from(from_val, datetime_picker_format)
+                                // .unwrap();
+                                // web_sys::console::log_1(&format!("Parsed from to NaiveDateTime {}", from_naive).into());
+                                // let from = DateTime::<Utc>::from_utc(from_naive, Utc);
+                                web_sys::console::log_1(&format!("Parsed from to DateTime<Utc> {}", from).into());
+                                //.with_timezone(&Utc);
+                                // web_sys::console::log_1(&format!("Parsed from value to {}", from).into());
+                                // let to = DateTime::parse_from_str(&demand_curve_data_to.get(), "%Y-%m-%d %H:%M")
+                                // .unwrap()
+                                // .with_timezone(&Utc);
+                                //let from = Utc.ymd(2022, 9, 17).and_hms(20, 0, 0);
+                                // let mut demand_curve_inputs: Vec<DemandCurveInput> = Vec::new();
+                                // demand_curve_inputs.push(DemandCurveInput {
+                                //                 timestamp: from,
+                                //                 value: 10.0,
+                                //             });
+                                // demand_curve_inputs.push(DemandCurveInput {
+                                //     timestamp: from + Duration::minutes(15),
+                                //     value: 20.0,
+                                // });
 
-                                                                let to_naive = NaiveDateTime::parse_from_str(to_val, datetime_picker_format)
-                                                                .unwrap();
-                                                                let to = DateTime::<Utc>::from_utc(to_naive, Utc);
-                                                                
-                                                                if from < to {
-                                                                    //let to = from + Duration::hours(1);
-                                                                    draw_demand_curve_time_series("canvas", from, to, demand_curve_inputs).await;
-                                                                    format!("Found JSON array with size {}", json_array.len().to_string())
-                                                                } else {
-                                                                    format!("From parameter needs to be before To parameter")
-                                                                }
-                                                            }
+                                // let to_naive = NaiveDateTime::parse_from_str(to_val, datetime_picker_format)
+                                // .unwrap();
+                                web_sys::console::log_1(&format!("Trying to parse to value {}", to_val).into());
+                                let to_offset = DateTime::parse_from_rfc3339(to_val).unwrap();
+                                web_sys::console::log_1(&format!("Parsed to value to fixed offset datetime: {}", to_offset).into());
+                                let to_naive = to_offset.naive_utc();
+                                web_sys::console::log_1(&format!("Parsed to value to naive datetime: {}", to_naive).into());
+                                let to = DateTime::<Utc>::from_utc(to_naive, Utc);
+                                
+                                if from < to {
+                                    //let to = from + Duration::hours(1);
+                                    draw_demand_curve_time_series("canvas", from, to, demand_curve_inputs).await;
+                                    format!("Found JSON array with size {}", json_array.len().to_string())
+                                } else {
+                                    format!("From parameter needs to be before To parameter")
+                                }
+                            }
                             None => "JSON is not an array".to_string(),
                         }),
                         Err(m) => output.set(m),
@@ -212,7 +235,7 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
     // );
 
     view! { cx,
-        div(style="position: relative;display: flex;flex-flow: column wrap;align-items: center;") {
+        // div(id="main_div" , style="position: relative;display: flex;flex-flow: column wrap;align-items: center;") {
             label(for="demand_curve_data_endpoint") {
                 "Data Source URL"
             }
@@ -221,7 +244,7 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
             //     "From"
             // }
             //bind:value=demand_curve_data_from
-            input(id="demand_curve_data_from_hidden", type="hidden", bind:value=demand_curve_data_from
+            input(id="demand_curve_data_from", type="hidden", bind:value=demand_curve_data_from
             // on:input=|_| {
             //     let window = web_sys::window().expect("no global `window` exists");
             //     let document = window.document().expect("should have a document on window");
@@ -231,12 +254,12 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
             //     web_sys::console::log_1(&format!("Using from node value {}", node_value).into());
             //     demand_curve_data_from.set(node_value);
             // }
-        )
+            )
             //input(ref=demand_curve_data_from_node_ref, id="demand_curve_data_from", type="datetime-local", bind:value=demand_curve_data_from)
             // label(for="demand_curve_data_to") {
             //     "To"
             // }
-            input(id="demand_curve_data_to_hidden", type="hidden", bind:value=demand_curve_data_to)
+            input(id="demand_curve_data_to", type="hidden", bind:value=demand_curve_data_to)
             // p(id="power_value") {
             //     //(canvas_params.get().get_power_value())
             //     (power_value.get())
@@ -254,7 +277,7 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
                                 }) {
                 "Increase power"
             }
-        }
+        // }
         
         canvas(id="canvas", width="800", height="600", style="padding-left: 0;padding-right: 0;margin-left: auto;margin-right: auto;display: block;")
     }
@@ -263,8 +286,10 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
 fn main() {
     // env_logger::Builder::new()
     // .init();
-    
-    sycamore::render(|cx| {
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let main_div = document.get_element_by_id("main_div").unwrap();
+    sycamore::render_to(|cx| {
         
         //draw("canvas", canvas_params.get().get_power_value());
         let view_model = view! { cx,
@@ -278,7 +303,7 @@ fn main() {
         //draw("canvas", *power_value.get());
         return view_model;
         
-    });
+    }, &main_div);
 }
 
 pub fn draw(canvas_id: &str, power: i32) {
@@ -332,7 +357,7 @@ fn fit_demand_curve_inputs_into_datetime_range(from: DateTime<Utc>, to: DateTime
             if demand_curve_input.timestamp < from {
                 last_demand_before_from = Some(demand_curve_input);
             }
-            if demand_curve_input.timestamp >= from || demand_curve_input.timestamp < to {
+            if demand_curve_input.timestamp >= from && demand_curve_input.timestamp < to {
                 if demand_curve_input.timestamp == from {
                     // this does not seem to work
                     found_input_with_from_timestamp = true;
@@ -351,8 +376,12 @@ fn fit_demand_curve_inputs_into_datetime_range(from: DateTime<Utc>, to: DateTime
         }
 
         if fitted_demand_curve_inputs.is_empty() || !found_input_with_from_timestamp {
+            web_sys::console::log_1(&"Checking if empty demand curve inputs can be filled with previously starting DemandCurveInput ...".into());
             match last_demand_before_from {
-                Some(d) => fitted_demand_curve_inputs.insert(0, DemandCurveInput { timestamp: from, value: d.value }),
+                Some(d) => {
+                    web_sys::console::log_1(&format!("Filling emtpy demand curve inputs with DemandCurveInput with timestamp {} and value {}", d.timestamp, d.value).into());
+                    fitted_demand_curve_inputs.insert(0, DemandCurveInput { timestamp: from, value: d.value });
+                },
                 None => {},
             }
         }

@@ -191,7 +191,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sycamore",
- "sycamore-futures",
  "url",
  "web-sys",
 ]

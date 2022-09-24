@@ -83,17 +83,14 @@ async fn DemandCurve<G: Html>(cx: Scope<'_>) -> View<G> {
                                 web_sys::console::log_1(&format!("Trying to parse from value {}", from_val).into());
                                 let from_offset = DateTime::parse_from_rfc3339(from_val).unwrap();
                                 web_sys::console::log_1(&format!("Parsed from value to fixed offset datetime: {}", from_offset).into());
-                                let from_naive = from_offset.naive_utc();
-                                web_sys::console::log_1(&format!("Parsed from value to naive datetime: {}", from_naive).into());
-                                let from = DateTime::<Utc>::from_utc(from_naive, Utc);
+                                let from = DateTime::<Utc>::from_utc(from_offset.naive_utc(), Utc);
                                 web_sys::console::log_1(&format!("Parsed from to DateTime<Utc> {}", from).into());
                                 web_sys::console::log_1(&format!("Trying to parse to value {}", to_val).into());
                                 let to_offset = DateTime::parse_from_rfc3339(to_val).unwrap();
                                 web_sys::console::log_1(&format!("Parsed to value to fixed offset datetime: {}", to_offset).into());
-                                let to_naive = to_offset.naive_utc();
-                                web_sys::console::log_1(&format!("Parsed to value to naive datetime: {}", to_naive).into());
-                                let to = DateTime::<Utc>::from_utc(to_naive, Utc);
-                                
+                                let to = DateTime::<Utc>::from_utc(to_offset.naive_utc(), Utc);
+                                web_sys::console::log_1(&format!("Parsed to to DateTime<Utc> {}", to).into());
+
                                 if from < to {
                                     draw_demand_curve_time_series("canvas", from, to, demand_curve_inputs).await;
                                     format!("Found JSON array with size {}", json_array.len().to_string())
